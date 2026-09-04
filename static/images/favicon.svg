@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="radarGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0284c7" />
+      <stop offset="1" stop-color="#2563eb" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#radarGrad)" />
+  <!-- Radar sweep rings -->
+  <circle cx="32" cy="32" r="24" stroke="white" stroke-opacity="0.25" stroke-width="1.8" />
+  <circle cx="32" cy="32" r="16" stroke="white" stroke-opacity="0.4" stroke-width="1.8" />
+  <circle cx="32" cy="32" r="8" stroke="white" stroke-opacity="0.6" stroke-width="1.8" />
+  <circle cx="32" cy="32" r="3.5" fill="#38bdf8" />
+  <!-- Radar beam sweep sector -->
+  <path d="M32 32 L56 32 A 24 24 0 0 0 49 15 Z" fill="white" fill-opacity="0.3" />
+  <line x1="32" y1="32" x2="49" y2="15" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+</svg>
