@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UAV Nadir InSAR Studio | 3D Radar Imaging Web App</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="static/images/favicon.svg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- KaTeX for formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="static/css/app.css">
+</head>
+<body>
+
+  <!-- Sticky Top Navigation Bar -->
+  <header class="app-header">
+    <a href="#" class="brand-section">
+      <img src="static/images/favicon.svg" alt="Radar Logo" class="brand-logo">
+      <div class="brand-title">UAV Nadir InSAR Studio</div>
+      <span class="brand-badge">IEEE Trans. Radar Systems</span>
+    </a>
+
+    <!-- Navigation Tabs / Links -->
+    <nav class="header-nav">
+      <a href="#sec-abstract" class="nav-link active">
+        <i class="fas fa-align-left"></i> Abstract
+      </a>
+      <a href="#sec-pipeline" class="nav-link pipeline-highlight">
+        <i class="fas fa-sitemap"></i> InSAR Pipeline
+      </a>
+      <a href="#sec-3d-studio" class="nav-link">
+        <i class="fas fa-cubes"></i> 3D Studio
+      </a>
+      <a href="#sec-autofocus" class="nav-link">
+        <i class="fas fa-magic"></i> Autofocus &amp; Focus
+      </a>
+      <a href="#sec-analytics" class="nav-link">
+        <i class="fas fa-tachometer-alt"></i> Analytics &amp; Specs
+      </a>
+      <a href="#sec-reference" class="nav-link">
+        <i class="fas fa-book"></i> Paper &amp; Figures
+      </a>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <a href="paper.pdf" target="_blank" class="btn-header" title="Download IEEE Paper PDF">
+        <i class="fas fa-file-pdf"></i> Paper PDF
+      </a>
+      <button id="btn-export-csv" class="btn-header" title="Export Reconstructed Points as CSV">
+        <i class="fas fa-download"></i> Export CSV
+      </button>
+      <button id="btn-screenshot" class="btn-header" title="Capture High-Res Viewport Screenshot">
+        <i class="fas fa-camera"></i> Screenshot
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Scrollable Page Wrapper -->
+  <div class="page-wrapper">
+
+    <!-- Hero Title Banner -->
+    <section class="hero-banner">
+      <h1 class="hero-title">3D Radar Imaging from the UAV Nadir</h1>
+      <p class="hero-subtitle">
+        An interferometric synthetic aperture radar (InSAR) framework for reconstructing 3D imagery directly beneath a drone using a lightweight 60 GHz MIMO mm-wave radar with phase gradient autofocus.
+      </p>
+
+      <div class="hero-authors">
+        <span><a href="mailto:hamed.javadi@imec.be">S. Hamed Javadi</a><sup>1</sup></span> &bull; 
+        <span><a href="mailto:hichem.sahli@imec.be">Hichem Sahli</a><sup>1,2</sup></span> &bull; 
+        <span><a href="mailto:andre.bourdoux@imec.be">André Bourdoux</a><sup>1</sup> <small>(Senior Member, IEEE)</small></span>
+      </div>
+
+      <div class="hero-affiliations">
+        <span><sup>1</sup>Interuniversity Micro-Electronics Center (IMEC), Leuven, Belgium</span> &bull; 
+        <span><sup>2</sup>Vrije Universiteit Brussel (VUB), Brussels, Belgium</span>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- 1. ABSTRACT SECTION (NOW FIRST PER INSTRUCTION 1)      -->
+    <!-- ======================================================= -->
+    <section id="sec-abstract" class="app-section" style="padding-top: 1rem;">
+      <div class="section-header-block">
+        <span class="section-tag"><i class="fas fa-file-alt"></i> Executive Overview</span>
+        <h2 class="section-main-title">Abstract</h2>
+      </div>
+
+      <div class="abstract-card">
+        <div class="abstract-text">
+          <p>
+            Radars improve the sensing robustness of Unmanned Aerial Vehicles (UAVs) by operating under poor lighting and weather conditions and seeing through occlusions such as vegetation. However, they suffer from poor angular resolution, which can be addressed using synthetic aperture radar (SAR) algorithms. State-of-the-art UAV SAR methods operate at a depression angle and are not suitable for sensor fusion applications where the data are collected from areas directly below the UAV (i.e., the UAV nadir).
+          </p>
+          <p>
+            In this paper, we present an <strong>interferometric SAR (InSAR) framework</strong> for reconstructing <strong>3D images from the UAV nadir</strong> using a low-cost multi-input-multi-output (MIMO) mm-wave radar. Additionally, an effective method based on the <strong>phase gradient autofocus (PGA)</strong> is presented for compensating the phase error across the virtual receive antennas. We extend the framework to account for the UAV attitude angles and evaluate the proposed pipeline in both extensive simulations and real-world flight experiments over complex terrain.
+          </p>
+        </div>
+
+        <!-- Paradigm Comparison: Conventional vs Proposed -->
+        <div class="paradigm-comparison-grid">
+          <div class="paradigm-card conventional">
+            <div class="paradigm-title" style="color: var(--danger);">
+              <i class="fas fa-times-circle"></i> Conventional Depression-Angle SAR
+            </div>
+            <ul class="paradigm-list">
+              <li><i class="fas fa-exclamation-triangle" style="color: var(--warning); margin-top: 3px;"></i> Looks sideways at 20&deg;&ndash;70&deg; depression angles, creating a blind spot directly beneath the drone (nadir).</li>
+              <li><i class="fas fa-exclamation-triangle" style="color: var(--warning); margin-top: 3px;"></i> Disconnect with downward optical, multispectral, and LiDAR sensors used on standard UAV payloads.</li>
+              <li><i class="fas fa-exclamation-triangle" style="color: var(--warning); margin-top: 3px;"></i> Requires a significantly larger maximum unambiguous range \(r_{\text{max}}\), limiting the flight altitude ceiling.</li>
+            </ul>
+          </div>
+
+          <div class="paradigm-card proposed">
+            <div class="paradigm-title" style="color: var(--success);">
+              <i class="fas fa-check-circle"></i> Proposed Downward Nadir InSAR
+            </div>
+            <ul class="paradigm-list">
+              <li><i class="fas fa-check" style="color: var(--success); margin-top: 3px;"></i> Reconstructs digital elevation maps (DEM) and 3D point clouds of the ground directly beneath the UAV.</li>
+              <li><i class="fas fa-check" style="color: var(--success); margin-top: 3px;"></i> Zero grazing angle geometry (90&deg; incidence) minimizes layover and foreshortening distortions.</li>
+              <li><i class="fas fa-check" style="color: var(--success); margin-top: 3px;"></i> Seamless multimodal fusion with nadir cameras for all-weather search and rescue, agriculture, and robotics.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- 2. EMPHASIZED INSAR PIPELINE (FOLLOWING ABSTRACT)       -->
+    <!-- ======================================================= -->
+    <section id="sec-pipeline" class="app-section">
+      <div class="section-header-block">
+        <span class="section-tag"><i class="fas fa-sitemap"></i> Core Scientific Framework</span>
+        <h2 class="section-main-title">The UAV Nadir InSAR Reconstruction Pipeline</h2>
+        <p class="section-description">
+          A step-by-step walkthrough of the mathematical algorithms transforming raw mm-wave FMCW radar beat signals into calibrated, autofocused 3D point clouds from the UAV nadir.
+        </p>
+      </div>
+
+      <div class="pipeline-showcase">
+        
+        <!-- High-Res Pipeline Diagram Banner (Fig. 3) with Lightbox Zoom -->
+        <div class="pipeline-hero-banner">
+          <img src="static/images/figures/fig3_insar_pipeline.png" alt="InSAR Framework for 3D Imaging from UAV Nadir (Fig. 3)" class="pipeline-hero-img zoomable-img" title="Click to view full-size diagram">
+          <p class="card-caption has-text-centered" style="margin-top: 0.85rem;">
+            <strong>Fig. 3: The Complete InSAR Framework (Click image to zoom):</strong> Motion compensation, Polar-to-grid interpolation, Fast-time IFT, Phase error correction via PGA \(e^{-j\epsilon(n)}\), Slow-time IFT, Rayleigh segmentation (RaySe), and Interferometric processing across virtual antenna pairs.
+          </p>
+        </div>
+
+        <!-- 6 Interactive Stage Cards Grid -->
+        <div class="pipeline-flow-grid">
+
+          <!-- Stage 1 -->
+          <div class="pipeline-stage-card">
+            <div class="stage-header">
+              <div class="stage-number">1</div>
+              <div class="stage-title">MIMO Transceiver &amp; Nadir Geometry</div>
+            </div>
+            <span class="stage-badge">Geometry &amp; Signal Model</span>
+            <div class="stage-body">
+              The antenna array is installed on the drone's underside pointing <strong>directly downward</strong> (zero grazing angle), with the baseline along the across-track (\(z\)) direction. The transmitted FMCW chirp is modeled as:
+            </div>
+            <div class="stage-formula-box">
+              $$s_T(t) = a_c \exp\left[ j\left(\omega_c + \frac{\gamma}{2}t\right)t \right]$$
+            </div>
+            <div class="stage-io-strip">
+              <span>Input: <strong>FMCW Chirp Cube</strong></span>
+              <span>Output: <strong>Beat Signal \(s(i, n)\)</strong></span>
+            </div>
+          </div>
+
+          <!-- Stage 2 -->
+          <div class="pipeline-stage-card">
+            <div class="stage-header">
+              <div class="stage-number">2</div>
+              <div class="stage-title">Coherent Beamforming &amp; PFA</div>
+            </div>
+            <span class="stage-badge">Spatial Interpolation &amp; SNR</span>
+            <div class="stage-body">
+              <strong>Beamforming (BF)</strong> across the MIMO elements coherently integrates signals w.r.t. the SAR Reference Point (SRP) at nadir, boosting the SNR. <strong>Polar Format Algorithm (PFA)</strong> then interpolates wavenumber samples onto a Cartesian grid \(k_x[n'], k_y[i']\):
+            </div>
+            <div class="stage-formula-box">
+              $$s_C(i', n') \xrightarrow{\text{2D-IFT}} \sigma(x_s, y_s)$$
+            </div>
+            <div class="stage-io-strip">
+              <span>Input: <strong>Raw Array Echoes</strong></span>
+              <span>Output: <strong>Grid-Mapped \(s_C(i', n')\)</strong></span>
+            </div>
+          </div>
+
+          <!-- Stage 3 -->
+          <div class="pipeline-stage-card">
+            <div class="stage-header">
+              <div class="stage-number">3</div>
+              <div class="stage-title">Phase Gradient Autofocus (PGA)</div>
+            </div>
+            <span class="stage-badge">Motion Compensation</span>
+            <div class="stage-body">
+              Along-track velocity perturbations \(v_e\) induce dominant <strong>quadratic phase errors</strong> in slow time: \(k_x(i, n)\epsilon(n) \approx k\alpha' v_e T_c n^2\). PGA estimates the phase error gradient across dominant scatterers, compensating each receive channel by:
+            </div>
+            <div class="stage-formula-box">
+              $$\exp[-j\epsilon(n)] \quad \text{with} \quad \epsilon(n) = \int \dot{\phi}(n) dn$$
+            </div>
+            <div class="stage-io-strip">
+              <span>Input: <strong>Defocused Range Profile</strong></span>
+              <span>Output: <strong>Phase-Compensated SAR</strong></span>
+            </div>
+          </div>
+
+          <!-- Stage 4 -->
+          <div class="pipeline-stage-card">
+            <div class="stage-header">
+              <div class="stage-number">4</div>
+              <div class="stage-title">Rayleigh Segmentation (RaySe)</div>
+            </div>
+            <span class="stage-badge">Scatterer Isolation</span>
+            <div class="stage-body">
+              SAR background speckle noise amplitude follows a Rayleigh distribution. RaySe estimates the Rayleigh scale parameter \(\hat{\sigma}_R = \sqrt{\frac{\text{Var}(A)}{2 - \pi/2}}\) and sets an upper-tail threshold to isolate prominent scatterer coordinates \((x_s, y_s)\):
+            </div>
+            <div class="stage-formula-box">
+              $$\tau = \hat{\sigma}_R \sqrt{-2\ln(P_{\text{fa}})}$$
+            </div>
+            <div class="stage-io-strip">
+              <span>Input: <strong>SAR Images \(S_{R_1}, S_{R_2}\)</strong></span>
+              <span>Output: <strong>Detected Major Peaks \((x_s, y_s)\)</strong></span>
+            </div>
+          </div>
+
+          <!-- Stage 5 -->
+          <div class="pipeline-stage-card">
+            <div class="stage-header">
+              <div class="stage-number">5</div>
+              <div class="stage-title">Multi-Baseline Phase Unwrapping</div>
+            </div>
+            <span class="stage-badge">Ambiguity Resolution</span>
+            <div class="stage-body">
+              Interferometric phase difference \(\phi = \angle(S_{R_1} \odot S^*_{R_2})\) is wrapped in \((-\pi, \pi]\). Two antenna pairs with <strong>coprime baselines</strong> (\(B = 7\frac{\lambda_n}{2}, B' = 5\frac{\lambda_n}{2}\)) resolve integer ambiguity numbers \((k, k')\) without clustering:
+            </div>
+            <div class="stage-formula-box">
+              $$k, k' = \arg\min_{k,k' \in \mathbb{Z}} \left| \frac{B}{B'}k' - k + \frac{1}{2\pi}\left(\frac{B}{B'}\phi' - \phi\right) \right|$$
+            </div>
+            <div class="stage-io-strip">
+              <span>Input: <strong>Wrapped \(\phi, \phi'\)</strong></span>
+              <span>Output: <strong>Unwrapped Phase \(\psi = \phi + 2\pi k\)</strong></span>
+            </div>
+          </div>
+
+          <!-- Stage 6 -->
+          <div class="pipeline-stage-card">
+            <div class="stage-header">
+              <div class="stage-number">6</div>
+              <div class="stage-title">Roll-Aware Across-Track Estimation</div>
+            </div>
+            <span class="stage-badge">3D Point Cloud Formation</span>
+            <div class="stage-body">
+              Accounting for UAV roll attitude \(\rho\), the analytical across-track coordinate \(z_s\) is computed. Furthermore, the misregistration limit \(\theta' < \frac{\lambda}{B(N_c T_c)} \approx 624^\circ/\text{s}\) guarantees that normal drone flights (~8&deg;/s) require <strong>zero image registration resampling</strong>:
+            </div>
+            <div class="stage-formula-box">
+              $$z_s = R_y \frac{\sin\rho\cos\rho \pm \sqrt{\kappa^2\sin^2\rho + \cos^2\rho}}{\kappa^2 - \cos^2\rho}$$
+            </div>
+            <div class="stage-io-strip">
+              <span>Input: <strong>Unwrapped \(\psi\), Depth \(R_y\)</strong></span>
+              <span>Output: <strong>3D Point Cloud \((x_s, y_s, z_s)\)</strong></span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- 3. 3D POINT CLOUD STUDIO WITH PROGRESSIVE FLIGHT SCAN   -->
+    <!-- ======================================================= -->
+    <section id="sec-3d-studio" class="app-section">
+      <div class="section-header-block">
+        <span class="section-tag"><i class="fas fa-cubes"></i> Live Radar Aperture Synthesis</span>
+        <h2 class="section-main-title">3D Point Cloud Studio</h2>
+        <p class="section-description">
+          Watch ground scatterers progressively reconstruct in real time as the drone advances along its track, with the radar beam expanding downward from the antenna array to the ground surface.
+        </p>
+      </div>
+
+      <div class="studio-layout">
+        <!-- Sidebar Controls (Preset pane removed per instruction 4) -->
+        <div class="studio-sidebar">
+          
+          <!-- Flight Dynamics -->
+          <div>
+            <div class="sidebar-group-title"><i class="fas fa-helicopter"></i> Flight Dynamics</div>
+
+            <div class="control-item">
+              <div class="control-item-header">
+                <span>Altitude</span>
+                <span id="val-altitude" class="control-item-val">25 m</span>
+              </div>
+              <input id="slider-altitude" type="range" min="10" max="50" step="1" value="25" class="slider-input">
+            </div>
+
+            <div class="control-item">
+              <div class="control-item-header">
+                <span>Velocity</span>
+                <span id="val-velocity" class="control-item-val">7 m/s</span>
+              </div>
+              <input id="slider-velocity" type="range" min="2" max="15" step="0.5" value="7" class="slider-input">
+            </div>
+
+            <div class="control-item">
+              <div class="control-item-header">
+                <span>Velocity Error (v<sub>e</sub>)</span>
+                <span id="val-ve" class="control-item-val">+2.5 m/s</span>
+              </div>
+              <input id="slider-ve" type="range" min="-5" max="5" step="0.25" value="2.5" class="slider-input">
+            </div>
+
+            <div class="control-item">
+              <div class="control-item-header">
+                <span>Roll Angle (&rho;)</span>
+                <span id="val-roll" class="control-item-val">0&deg;</span>
+              </div>
+              <input id="slider-roll" type="range" min="-15" max="15" step="1" value="0" class="slider-input">
+            </div>
+          </div>
+
+          <!-- Phase Autofocus & Segmentation -->
+          <div>
+            <div class="sidebar-group-title"><i class="fas fa-sliders-h"></i> InSAR Algorithms</div>
+
+            <div class="control-item">
+              <label class="checkbox-wrap">
+                <input id="toggle-pga" type="checkbox" checked>
+                <span>Enable PGA Autofocus</span>
+              </label>
+            </div>
+
+            <div class="control-item">
+              <div class="control-item-header">
+                <span>RaySe Cutoff</span>
+                <span id="val-rayse" class="control-item-val">65</span>
+              </div>
+              <input id="slider-rayse" type="range" min="40" max="95" step="1" value="65" class="slider-input">
+            </div>
+          </div>
+
+          <!-- 3D Visualization Options -->
+          <div>
+            <div class="sidebar-group-title"><i class="fas fa-palette"></i> 3D Display</div>
+
+            <div class="control-item">
+              <div class="control-item-header"><span>Colormap Mode</span></div>
+              <select id="select-colormap" class="slider-input" style="height: 32px; background: #15203b; color: #fff; border: 1px solid #243455; padding: 0 8px;">
+                <option value="height">Elevation (Jet: -2m to 10m)</option>
+                <option value="snr">Radar Power / SNR</option>
+                <option value="tech">Monochrome Tech Cyan</option>
+              </select>
+            </div>
+
+            <div class="control-item">
+              <div class="control-item-header"><span>Point Size</span></div>
+              <input id="slider-point-size" type="range" min="0.2" max="2.0" step="0.1" value="0.55" class="slider-input">
+            </div>
+          </div>
+
+          <!-- Replay Flight Scan Action -->
+          <div style="margin-top: auto;">
+            <button id="btn-run-pipeline" class="btn-action-run">
+              <i class="fas fa-redo"></i> Replay Aperture Scan
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 3D WebGL Canvas Area -->
+        <div class="studio-canvas-area">
+          
+          <!-- Top Left Scene Status HUD -->
+          <div class="viewport-hud-top">
+            <div id="hud-scene-title" class="hud-title">DJI Matrice-300 Flight Experiment (Pond Scene)</div>
+            <div>Reconstructed: <span id="hud-point-count" style="color: var(--accent); font-weight: 600;">Accumulating points...</span></div>
+            <div>Radar Beam: <span style="color: var(--accent); font-weight: 600;">Downward Nadir Pyramid</span></div>
+          </div>
+
+          <!-- Top Right Floating Camera Presets Toolbar -->
+          <div class="viewport-toolbar-floating">
+            <button id="btn-replay-scan" class="btn-tool" title="Replay progressive flight scan">
+              <i class="fas fa-redo"></i> Replay Scan
+            </button>
+            <button id="btn-show-all-points" class="btn-tool" title="Toggle full point cloud display">
+              <i class="fas fa-layer-group"></i> Show All
+            </button>
+            <button class="btn-tool btn-view-preset is-active" data-view="iso" title="3D Isometric Orbit View">
+              <i class="fas fa-cube"></i> Orbit
+            </button>
+            <button class="btn-tool btn-view-preset" data-view="bev" title="Bird's-Eye View (Top Down: X-Z)">
+              <i class="fas fa-eye"></i> Top (BEV)
+            </button>
+            <button class="btn-tool btn-view-preset" data-view="side" title="Side Nadir View (Y-Z)">
+              <i class="fas fa-arrows-alt-v"></i> Side (Y-Z)
+            </button>
+            <button class="btn-tool btn-view-preset" data-view="front" title="Front Cross-Range View (X-Y)">
+              <i class="fas fa-arrows-alt-h"></i> Front (X-Y)
+            </button>
+            <button id="btn-toggle-rotate" class="btn-tool active" title="Toggle Auto Rotation">
+              <i class="fas fa-sync-alt"></i> Auto-Rotate
+            </button>
+          </div>
+
+          <!-- Three.js Canvas -->
+          <div id="point-cloud-canvas-container"></div>
+
+          <!-- Bottom Telemetry HUD -->
+          <div class="viewport-hud-bottom">
+            <div class="hud-stat-item">
+              <span>Flight Track:</span> <strong>v = 7 m/s @ 25m AGL</strong>
+            </div>
+            <div class="hud-stat-item">
+              <span>Aperture:</span> <strong>CPI = 26.2 ms (Nc = 255)</strong>
+            </div>
+            <div class="hud-stat-item">
+              <span>Image Contrast:</span> <strong>IC = 36.02</strong>
+            </div>
+            <div class="hud-stat-item">
+              <span>Roll Rate Limit:</span> <strong>624.0&deg;/s</strong>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- 4. AUTOFOCUS & FOCUS ANALYSIS (CORRECTED PER REQ 2 & 3) -->
+    <!-- ======================================================= -->
+    <section id="sec-autofocus" class="app-section">
+      <div class="section-header-block">
+        <span class="section-tag"><i class="fas fa-magic"></i> Autofocus Performance</span>
+        <h2 class="section-main-title">Autofocus &amp; Image Focus Analysis</h2>
+        <p class="section-description">
+          Detailed evaluation of phase error compensation via PGA. Compare defocused SAR imagery against autofocused results with pixel-perfect alignment, and inspect the phase unwrapping validation.
+        </p>
+      </div>
+
+      <div class="autofocus-grid">
+        
+        <!-- Corrected Interactive Before / After Wiper Slider (Fig. 5) -->
+        <div class="chart-panel-card full-width">
+          <div class="chart-card-title">
+            <i class="fas fa-arrows-alt-h" style="color: var(--accent);"></i> Interactive Autofocus Image Wiper (Fig. 5 in Paper)
+          </div>
+          <div class="comparison-container" id="autofocus-slider-container">
+            <div class="comparison-badge badge-left">Without Phase-Error Correction</div>
+            <div class="comparison-badge badge-right">With Phase-Error Compensation</div>
+
+            <div class="comparison-images">
+              <!-- Background Image (Compensated) -->
+              <img src="static/images/figures/fig5_with_pga.png" alt="With PGA Compensation" class="comparison-image" draggable="false">
+
+              <!-- Foreground Overlaid Image (Uncompensated) -->
+              <div class="comparison-overlay" id="comparison-overlay">
+                <img src="static/images/figures/fig5_without_pga.png" alt="Without PGA Correction" id="comparison-overlay-img" draggable="false">
+              </div>
+
+              <!-- Draggable Handle -->
+              <div class="comparison-handle" id="comparison-handle">
+                <i class="fas fa-arrows-alt-h"></i>
+              </div>
+            </div>
+          </div>
+          <p class="card-caption has-text-centered">
+            <strong>Interactive Wiper:</strong> Drag the blue handle to wipe across the SAR image at receiver \(R_1\). Notice how the smeared, defocused scatterer patterns on the left sharpen into crisp, isolated peak scatterers on the right, confirming the effectiveness of Phase Gradient Autofocus (PGA).
+          </p>
+        </div>
+
+        <!-- Fig. 4: Quadratic Phase Error and PGA Estimation (Corrected) -->
+        <div class="chart-panel-card">
+          <div class="chart-card-title">
+            <i class="fas fa-wave-square" style="color: #f97316;"></i> Quadratic Phase Error &amp; PGA Estimation (Fig. 4)
+          </div>
+          <div class="chart-holder">
+            <canvas id="chart-phase-error"></canvas>
+          </div>
+          <p class="card-caption">
+            <strong>Fig. 4 in the paper:</strong> Quadratic phase error induced by along-track velocity errors vs. PGA estimation across chirps \(n \in [0, 255]\). Notice the close agreement around the center (\(n=127.5\)) and bounded residual discrepancy at the aperture edges.
+          </p>
+        </div>
+
+        <!-- Fig. 7: Multi-Baseline Phase Unwrapping (Now explicitly shown per Req 3) -->
+        <div class="chart-panel-card">
+          <div class="chart-card-title">
+            <i class="fas fa-link" style="color: var(--primary);"></i> Multi-Baseline Phase Unwrapping (Fig. 7 in Paper)
+          </div>
+          <div style="text-align: center; margin: 0.5rem 0;">
+            <img src="static/images/figures/fig7_phase_unwrapping.png" alt="Pixel-wise Phase Difference Before and After Phase Unwrapping (Fig. 7)" class="zoomable-img" style="max-height: 250px; width: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-color);" title="Click to view full-size Fig. 7">
+          </div>
+          <p class="card-caption">
+            <strong>Fig. 7 in the paper:</strong> Pixel-wise phase difference between \(R_1\) and \(R_2\) before (top) and after (bottom) phase unwrapping. Marked points \(p_1, p_2, p_3\) indicate corrected phases for higher \(z\) scatterers whose phases were wrapped outside \((-\pi, \pi]\).
+          </p>
+        </div>
+
+        <!-- RaySe Segmentation -->
+        <div class="chart-panel-card">
+          <div class="chart-card-title">
+            <i class="fas fa-filter" style="color: var(--accent);"></i> RaySe Amplitude Distribution &amp; Threshold
+          </div>
+          <div class="chart-holder">
+            <canvas id="chart-rayse"></canvas>
+          </div>
+          <p class="card-caption">
+            Fitted Rayleigh background noise PDF with upper-tail cutoff threshold isolating dominant target scatterers from speckle noise.
+          </p>
+        </div>
+
+        <!-- Image Contrast Improvement Table (Fig. 11) -->
+        <div class="chart-panel-card">
+          <div class="chart-card-title">
+            <i class="fas fa-chart-bar" style="color: var(--success);"></i> Image Contrast (IC) Metric Evolution (Fig. 11)
+          </div>
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th>Flight Instance</th>
+                <th>Without PGA</th>
+                <th>With PGA</th>
+                <th>Contrast Boost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Instance 1 (Pond edge)</td>
+                <td style="color: #ef4444;">IC = 32.16</td>
+                <td style="color: #10b981; font-weight: 700;">IC = 36.02</td>
+                <td style="color: var(--accent); font-weight: 700;">+12.0%</td>
+              </tr>
+              <tr>
+                <td>Instance 2 (Tree foliage)</td>
+                <td style="color: #ef4444;">IC = 11.97</td>
+                <td style="color: #10b981; font-weight: 700;">IC = 13.12</td>
+                <td style="color: var(--accent); font-weight: 700;">+9.6%</td>
+              </tr>
+              <tr>
+                <td>Instance 3 (Dense canopy)</td>
+                <td style="color: #ef4444;">IC = 3.55</td>
+                <td style="color: #10b981; font-weight: 700;">IC = 3.83</td>
+                <td style="color: var(--accent); font-weight: 700;">+7.9%</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="card-caption">
+            Image Contrast metric: \(\text{IC} = \sqrt{\text{mean}\{(I - \bar{I})^2\}} / \bar{I}\). Higher values confirm sharper SAR focus.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- 5. QUANTITATIVE ANALYTICS (RADAR SPECS MOVED HERE)      -->
+    <!-- ======================================================= -->
+    <section id="sec-analytics" class="app-section">
+      <div class="section-header-block">
+        <span class="section-tag"><i class="fas fa-tachometer-alt"></i> Benchmark Metrics</span>
+        <h2 class="section-main-title">Quantitative Analytics &amp; Radar Specifications</h2>
+        <p class="section-description">
+          Hardware parameters, performance metrics, and 10-trial Monte Carlo perturbation evaluations under randomized velocity errors and roll attitude disturbances.
+        </p>
+      </div>
+
+      <!-- Radar Specs Metric Strip (Moved here per Instruction 4) -->
+      <div class="metric-strip-analytics">
+        <div class="metric-box-card">
+          <div class="metric-val">60 GHz</div>
+          <div class="metric-name">TI IWR6843ISK MIMO FMCW</div>
+        </div>
+        <div class="metric-box-card">
+          <div class="metric-val">&lt; 1.0 m</div>
+          <div class="metric-name">Consistently Bounded 3D RMSE</div>
+        </div>
+        <div class="metric-box-card">
+          <div class="metric-val">25 m</div>
+          <div class="metric-name">Direct Nadir UAV Altitude</div>
+        </div>
+        <div class="metric-box-card">
+          <div class="metric-val">624&deg;/s</div>
+          <div class="metric-name">Roll Misregistration Tolerance</div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        
+        <!-- RMSE vs Scatterers Curve (Fig. 8) -->
+        <div class="chart-panel-card">
+          <div class="chart-card-title">
+            <i class="fas fa-shield-alt" style="color: var(--accent);"></i> 3D Reconstruction RMSE vs. Number of Scatterers (Fig. 8)
+          </div>
+          <div class="chart-holder">
+            <canvas id="chart-rmse"></canvas>
+          </div>
+          <p class="card-caption">
+            Evaluated across 10 independent trials per scatterer count under random velocity (\(\pm 2\) m/s) and roll perturbations (\(\pm 5^\circ\)). The 3D Euclidean error remains consistently bounded under the 1.0-meter red dashed benchmark boundary.
+          </p>
+        </div>
+
+        <!-- Radar & Flight Specifications Table (Table I) -->
+        <div class="chart-panel-card">
+          <div class="chart-card-title">
+            <i class="fas fa-table" style="color: var(--primary);"></i> Radar &amp; Flight Parameters (Table I in Paper)
+          </div>
+          <table class="app-table">
+            <thead>
+              <tr>
+                <th>Parameter Name</th>
+                <th>Symbol</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Carrier Frequency</td><td>\(f_c\)</td><td>60 GHz</td></tr>
+              <tr><td>Radar Bandwidth</td><td>\(B\)</td><td>1.442 GHz</td></tr>
+              <tr><td>Pulse Repetition Interval</td><td>\(T_c\)</td><td>102.88 &mu;s</td></tr>
+              <tr><td>Chirps per Frame</td><td>\(N_c\)</td><td>255</td></tr>
+              <tr><td>Frame Period</td><td>\(T_f\)</td><td>100 ms</td></tr>
+              <tr><td>Samples per Chirp</td><td>\(S\)</td><td>400</td></tr>
+              <tr><td>Sampling Frequency</td><td>\(F_s\)</td><td>8 MHz</td></tr>
+              <tr class="highlight"><td>Nominal Flight Velocity</td><td>\(v\)</td><td>7 m/s</td></tr>
+              <tr class="highlight"><td>Nominal Flight Altitude</td><td>\(h\)</td><td>25 m AGL</td></tr>
+              <tr><td>Primary InSAR Baseline</td><td>\(B\)</td><td>17.5 mm (\(7\frac{\lambda}{2}\))</td></tr>
+              <tr><td>Secondary Coprime Baseline</td><td>\(B'\)</td><td>12.5 mm (\(5\frac{\lambda}{2}\))</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- 6. PAPER & FIGURES (WITH LIGHTBOX ZOOM PER REQ 5)       -->
+    <!-- ======================================================= -->
+    <section id="sec-reference" class="app-section">
+      <div class="section-header-block">
+        <span class="section-tag"><i class="fas fa-book-open"></i> Publications &amp; Gallery</span>
+        <h2 class="section-main-title">Paper Reference &amp; High-Resolution Figures</h2>
+        <p class="section-description">
+          Click on any figure below to open it in full resolution. Metadata and BibTeX citation for academic referencing.
+        </p>
+      </div>
+
+      <!-- Paper Details Box -->
+      <div class="paper-reference-block">
+        <div class="paper-ref-title">3D Radar Imaging from the UAV Nadir</div>
+        <div class="paper-authors-list">
+          <strong>Authors:</strong> S. Hamed Javadi, Hichem Sahli, and André Bourdoux (Senior Member, IEEE)
+        </div>
+        <p style="color: var(--text-dim); font-size: 0.88rem; margin-bottom: 0.75rem;">
+          IEEE Transactions on Radar Systems &bull; Interuniversity Micro-Electronics Center (IMEC), Leuven, Belgium &bull; Vrije Universiteit Brussel (VUB), Brussels, Belgium
+        </p>
+        <p class="paper-abstract-text">
+          <strong>Summary:</strong> This paper introduces the first InSAR framework for 3D radar imaging directly beneath a UAV (nadir) using a 60 GHz MIMO FMCW radar with Phase Gradient Autofocus (PGA) across the virtual receive antennas.
+        </p>
+      </div>
+
+      <!-- Figures Gallery Grid (Clickable to open in larger size per instruction 5) -->
+      <div class="figures-gallery-grid">
+        <div class="gallery-card">
+          <img src="static/images/figures/fig1_sar_geometry.png" alt="Fig. 1: (a) SAR 2D geometry with SRP. (b) Nadir plane of the UAV." class="zoomable-img" title="Click to view enlarged">
+          <div class="gallery-caption"><strong>Fig. 1:</strong> (a) SAR 2D geometry with SRP. (b) Nadir plane of the UAV.</div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="static/images/figures/fig2_insar_geometry.png" alt="Fig. 2: InSAR geometry with antennas R1, R2 and baseline B." class="zoomable-img" title="Click to view enlarged">
+          <div class="gallery-caption"><strong>Fig. 2:</strong> InSAR geometry with antennas \(R_1, R_2\) and baseline \(B\).</div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="static/images/figures/fig9_experiment_setup.png" alt="Fig. 9: Experimental setup: (a) Radar on drone, (b) TI board, (c) Virtual array." class="zoomable-img" title="Click to view enlarged">
+          <div class="gallery-caption"><strong>Fig. 9:</strong> DJI Matrice-300 drone, TI IWR6843ISK board, and virtual array.</div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="static/images/figures/fig10_pond_point_clouds.png" alt="Fig. 10: UAV flight over pond and reconstructed 3D radar point clouds." class="zoomable-img" title="Click to view enlarged">
+          <div class="gallery-caption"><strong>Fig. 10:</strong> UAV flight over pond and reconstructed 3D radar point clouds.</div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="static/images/figures/fig11_instances_contrast.png" alt="Fig. 11: Impact of phase error compensation on SAR images at 3 instances." class="zoomable-img" title="Click to view enlarged">
+          <div class="gallery-caption"><strong>Fig. 11:</strong> SAR image contrast enhancement across instances 1, 2, and 3.</div>
+        </div>
+
+        <div class="gallery-card">
+          <img src="static/images/figures/fig12_point_cloud_overlay.png" alt="Fig. 12: Point clouds overlaid on bird's-eye view camera imagery." class="zoomable-img" title="Click to view enlarged">
+          <div class="gallery-caption"><strong>Fig. 12:</strong> Point clouds overlaid onto bird's-eye view camera imagery.</div>
+        </div>
+      </div>
+
+      <!-- BibTeX Box -->
+      <div class="bibtex-box">
+        <div class="bibtex-header">
+          <h3><i class="fas fa-quote-right"></i> BibTeX Citation</h3>
+          <button id="copy-bibtex-btn" class="copy-btn">
+            <i class="fas fa-copy"></i> Copy BibTeX
+          </button>
+        </div>
+        <pre class="bibtex-code"><code id="bibtex-code">@article{javadi2026uavnadir,
+  title     = {3D Radar Imaging from the UAV Nadir},
+  author    = {Javadi, S. Hamed and Sahli, Hichem and Bourdoux, Andr{\'e}},
+  journal   = {IEEE Transactions on Radar Systems},
+  year      = {2026},
+  publisher = {IEEE}
+}</code></pre>
+      </div>
+
+      <!-- Acknowledgements -->
+      <div style="text-align: center; margin-top: 2rem; font-size: 0.82rem; color: var(--text-dim);">
+        <p><strong>Acknowledgement:</strong> The research leading to these results received funding from the Horizon Europe project <em>Edge AI Technologies for Optimised Performance Embedded Processing</em> (Grant agreement ID: 101097300).</p>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- Lightbox Modal for Large Image Viewing (Instruction 5) -->
+  <div id="image-lightbox-modal" class="lightbox-modal">
+    <div class="lightbox-backdrop" onclick="closeLightbox()"></div>
+    <div class="lightbox-content">
+      <button class="lightbox-close-btn" onclick="closeLightbox()">&times;</button>
+      <img id="lightbox-img" src="" alt="Enlarged Figure">
+      <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <p>
+      UAV Nadir InSAR Studio &bull; Built for research dissemination and interactive radar signal processing.
+    </p>
+    <p style="font-size: 0.76rem; margin-top: 0.4rem;">
+      Template and design inspired by <a href="https://wifi-jepa.github.io/" target="_blank">WiFi-JEPA</a> and the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> academic project structure.
+    </p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="static/js/presets.js"></script>
+  <script src="static/js/insar_engine.js"></script>
+  <script src="static/js/viewer3d.js"></script>
+  <script src="static/js/charts.js"></script>
+  <script src="static/js/app.js"></script>
+</body>
+</html>
