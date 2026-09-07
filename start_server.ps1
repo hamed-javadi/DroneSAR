@@ -42,6 +42,7 @@ try {
                 ".png"  { $res.ContentType = "image/png" }
                 ".jpg"  { $res.ContentType = "image/jpeg" }
                 ".svg"  { $res.ContentType = "image/svg+xml" }
+                ".mp4"  { $res.ContentType = "video/mp4" }
                 ".pdf"  { $res.ContentType = "application/pdf" }
                 default { $res.ContentType = "application/octet-stream" }
             }

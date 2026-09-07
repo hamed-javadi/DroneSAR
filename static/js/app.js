@@ -13,6 +13,8 @@ const App = (function () {
   };
 
   function init() {
+    relocatePointCloudStudio();
+
     // 1. Initialize 3D Viewport with Pond Scene
     Viewer3D.init('point-cloud-canvas-container');
     const pondPoints = generatePondExperimentData();
@@ -34,6 +36,15 @@ const App = (function () {
     ChartsManager.renderPhaseErrorChart('chart-phase-error');
     ChartsManager.renderRaySeChart('chart-rayse', state.rayseThreshold);
     ChartsManager.renderRMSEChart('chart-rmse');
+  }
+
+  function relocatePointCloudStudio() {
+    const studioSection = document.getElementById('sec-3d-studio');
+    const referenceSection = document.getElementById('sec-reference');
+
+    if (studioSection && referenceSection) {
+      referenceSection.before(studioSection);
+    }
   }
 
   // Smooth scroll and active link highlight as user scrolls (ScrollSpy)
